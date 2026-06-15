@@ -1,0 +1,120 @@
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #064e3b;
+  background-image: url('/crescent.svg');
+  background-repeat: repeat;
+  background-size: 120px 120px;
+}
+
+body {
+  color: #1a1a1a;
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  max-width: 390px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #064e3b 0%, #065f46 8%, #fafaf7 18%, #fafaf7 100%);
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 80px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(240, 201, 74, 0.15);
+}
+* {
+  box-sizing: border-box;
+}
+
+.gold-divider {
+  height: 1px;
+  background: rgba(240, 201, 74, 0.4);
+}
+
+.card-base {
+  background-color: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e8f5ee;
+  box-shadow: 0 2px 16px rgba(6, 79, 59, 0.1);
+}
+
+.btn-primary {
+  background-image: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-blue {
+  background-image: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-blue:active {
+  transform: scale(0.98);
+}
+
+.btn-amber {
+  background-image: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-amber:active {
+  transform: scale(0.98);
+}
+
+.btn-outline {
+  border: 2px solid #10b981;
+  color: #10b981;
+  font-weight: 600;
+  border-radius: 12px;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-outline:active {
+  transform: scale(0.98);
+}
+
+.xp-badge {
+  background-image: linear-gradient(135deg, #f0c94a, #d97706);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.125rem 0.5rem;
+  border-radius: 8px;
+}
+
+.arabic-text {
+  font-family: 'Scheherazade New', serif;
+  color: #1b3a2d;
+  direction: rtl;
+}
