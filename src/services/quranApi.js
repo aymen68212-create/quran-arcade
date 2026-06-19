@@ -54,7 +54,6 @@ export function buildQuestions(allAyahs) {
     if (!bySurah.has(a.surah.number)) bySurah.set(a.surah.number, [])
     bySurah.get(a.surah.number).push(a)
   })
-
   bySurah.forEach((ayahs) => ayahs.sort((a, b) => a.numberInSurah - b.numberInSurah))
 
   const eligible = []
@@ -65,6 +64,7 @@ export function buildQuestions(allAyahs) {
           display: ayahs[i].text,
           correct: ayahs[i - 1].text,
           surahNumber: surahNum,
+          allSurahAyahs: ayahs,
         })
       }
     }
@@ -79,36 +79,36 @@ export function buildQuestions(allAyahs) {
     if (!usedSurahs.has(q.surahNumber)) {
       usedSurahs.add(q.surahNumber)
 
-      const wrongPool = eligible.filter(
-        (e) => e.surahNumber !== q.surahNumber && e.correct !== q.correct
-      )
-      const wrongShuffled = wrongPool.sort(() => Math.random() - 0.5)
-      const wrongAnswers = wrongShuffled.slice(0, 3).map((e) => e.correct)
+      const sameSurahWrong = q.allSurahAyahs
+        .filter((a) => a.text !== q.correct && a.text !== q.display)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3)
+        .map((a) => a.text)
 
-      if (wrongAnswers.length < 3) continue
+      let wrongAnswers = sameSurahWrong
+      if (wrongAnswers.length < 3) {
+        const fallback = eligible
+          .filter((e) => e.surahNumber !== q.surahNumber && e.correct !== q.correct)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 3 - wrongAnswers.length)
+          .map((e) => e.correct)
+        wrongAnswers = [...wrongAnswers, ...fallback]
+      }
 
       const choices = [q.correct, ...wrongAnswers].sort(() => Math.random() - 0.5)
-
-      questions.push({
-        display: q.display,
-        correct: q.correct,
-        choices,
-      })
+      questions.push({ display: q.display, correct: q.correct, choices })
     }
   }
 
   if (questions.length < 10) {
     for (const q of shuffled) {
       if (questions.length >= 10) break
-      if (!questions.find((existing) => existing.display === q.display)) {
-        const wrongPool = eligible.filter(
-          (e) => e.display !== q.display && e.correct !== q.correct
-        )
-        const wrongAnswers = wrongPool
+      if (!questions.find((ex) => ex.display === q.display)) {
+        const wrongAnswers = q.allSurahAyahs
+          .filter((a) => a.text !== q.correct && a.text !== q.display)
           .sort(() => Math.random() - 0.5)
           .slice(0, 3)
-          .map((e) => e.correct)
-        if (wrongAnswers.length < 3) continue
+          .map((a) => a.text)
         const choices = [q.correct, ...wrongAnswers].sort(() => Math.random() - 0.5)
         questions.push({ display: q.display, correct: q.correct, choices })
       }

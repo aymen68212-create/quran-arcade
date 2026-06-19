@@ -86,7 +86,7 @@ export default function GameScreen() {
   const [saved, setSaved] = useState(false)
   const answeredRef = useRef(false)
 
-  const duration = getTimeForQuestion(currentIndex)
+  const duration = getTimeForQuestion(currentIndex, challengeType)
   const currentQuestion = questions[currentIndex]
 
   useEffect(() => {

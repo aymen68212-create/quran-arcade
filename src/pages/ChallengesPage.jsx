@@ -61,11 +61,18 @@ function ExerciseCard({ exercise, index, onStart }) {
               <span className="xp-badge shrink-0">{theme.xp}</span>
             </div>
             <p className="text-sm text-text-secondary mb-2">{exercise.subtitle}</p>
-            <span
-              className={`inline-block text-xs font-medium border rounded-pill px-2 py-0.5 ${theme.pill}`}
-            >
-              {theme.difficulty}
-            </span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span
+                className={`inline-block text-xs font-medium border rounded-pill px-2 py-0.5 ${theme.pill}`}
+              >
+                {theme.difficulty}
+              </span>
+              {exercise.expertPill && (
+                <span className="inline-block text-xs font-medium border rounded-pill px-2 py-0.5 text-accent-red border-accent-red">
+                  ⚡ Expert
+                </span>
+              )}
+            </div>
           </div>
         </div>
         <button onClick={onStart} className={`${theme.btn} w-full`}>
@@ -104,8 +111,9 @@ export default function ChallengesPage() {
       theme: 'green',
       icon: '🔙',
       title: 'Le X-1',
-      subtitle: 'Trouve le verset précédent',
+      subtitle: 'Trouve le verset précédent · Mode Expert',
       challengeType: 'x1',
+      expertPill: true,
     },
     {
       theme: 'blue',

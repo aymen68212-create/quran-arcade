@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
-export function getTimeForQuestion(questionIndex) {
+const X1_TIMER_SPIRAL = [45, 40, 35, 30, 25, 20, 15, 12, 8, 5]
+
+export function getTimeForQuestion(questionIndex, challengeType) {
+  if (challengeType === 'x1') {
+    return X1_TIMER_SPIRAL[Math.min(questionIndex, X1_TIMER_SPIRAL.length - 1)]
+  }
   return Math.max(15, 60 - questionIndex * 5)
 }
 
