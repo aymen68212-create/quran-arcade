@@ -1,12 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
-const X1_TIMER_SPIRAL = [50, 45, 40, 35, 30, 25, 20, 15, 10, 5]
+const TIMER_SPIRAL = [50, 45, 40, 35, 30, 25, 20, 15, 10, 5]
 
-export function getTimeForQuestion(questionIndex, challengeType) {
-  if (challengeType === 'x1') {
-    return X1_TIMER_SPIRAL[Math.min(questionIndex, X1_TIMER_SPIRAL.length - 1)]
-  }
-  return Math.max(15, 60 - questionIndex * 5)
+export function getTimeForQuestion(questionIndex) {
+  return TIMER_SPIRAL[Math.min(questionIndex, TIMER_SPIRAL.length - 1)]
 }
 
 export function useTimer(duration, onTimeout, isActive) {
