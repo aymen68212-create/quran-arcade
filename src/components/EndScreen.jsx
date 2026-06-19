@@ -29,7 +29,16 @@ function getMessage(score, total = 10) {
   return 'تدرب ! Rejoue pour progresser !'
 }
 
-export default function EndScreen({ title, score, totalQuestions = 10, xpEarned, onReplay, onChangeBlock }) {
+export default function EndScreen({
+  title,
+  score,
+  totalQuestions = 10,
+  xpEarned,
+  onReplay,
+  onChangeBlock,
+  showLoginBanner,
+  onLogin,
+}) {
   const stars = getStars(score, totalQuestions)
 
   return (
@@ -55,6 +64,17 @@ export default function EndScreen({ title, score, totalQuestions = 10, xpEarned,
       <span className="xp-badge text-sm px-4 py-1.5 inline-block mb-4">
         +{xpEarned} XP gagnés
       </span>
+
+      {showLoginBanner && (
+        <div className="bg-[#F0FDF9] border border-[#E8F5EE] rounded-button p-3 mb-4 text-left">
+          <p className="text-xs text-text-secondary mb-2">
+            Connecte-toi pour sauvegarder tes progrès et apparaître au classement
+          </p>
+          <button onClick={onLogin} className="btn-primary w-full min-h-[44px] text-sm">
+            Se connecter
+          </button>
+        </div>
+      )}
 
       <p className="arabic-text text-lg text-text-arabic mb-6">{getMessage(score, totalQuestions)}</p>
 

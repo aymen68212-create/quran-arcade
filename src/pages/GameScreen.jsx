@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useGameContext } from '../context/GameContext'
+import { useAuth } from '../context/AuthContext'
 import { useChallenge } from '../hooks/useChallenge'
 import { useTimer, getTimeForQuestion } from '../hooks/useTimer'
 import { saveSessionResult } from '../services/localStorage'
@@ -64,6 +65,7 @@ export default function GameScreen() {
   const navigate = useNavigate()
   const location = useLocation()
   const { selectedHizbBlock, updateProfile } = useGameContext()
+  const { user, updateXP, openAuthModal } = useAuth()
 
   const challengeType = location.state?.challengeType || 'x1'
   const hizbBlock = location.state?.hizbBlock || selectedHizbBlock
@@ -151,16 +153,41 @@ export default function GameScreen() {
         challengeType === 'next-ayah'
           ? xpEarned
           : score * (config.xpPerCorrect ?? 0) + (config.xpBonusComplete ?? 0)
-      saveSessionResult({
-        score,
-        xpEarned: totalXp,
-        hizbBlock: hizbBlock.label,
-      })
+
+      if (user) {
+        updateXP(totalXp, {
+          challengeType,
+          hizbBlock: hizbBlock.label,
+          hizbStart: hizbBlock.startHizb,
+          hizbEnd: hizbBlock.endHizb,
+          score,
+          totalQuestions,
+        })
+      } else {
+        saveSessionResult({
+          score,
+          xpEarned: totalXp,
+          hizbBlock: hizbBlock.label,
+        })
+        updateProfile()
+      }
+
       setXpEarned(totalXp)
-      updateProfile()
       setSaved(true)
     }
-  }, [sessionComplete, saved, score, xpEarned, challengeType, config, hizbBlock.label, updateProfile])
+  }, [
+    sessionComplete,
+    saved,
+    score,
+    xpEarned,
+    challengeType,
+    config,
+    hizbBlock,
+    totalQuestions,
+    user,
+    updateXP,
+    updateProfile,
+  ])
 
   const getChoiceState = (choice) => {
     if (!answered) return 'default'
@@ -219,6 +246,8 @@ export default function GameScreen() {
           xpEarned={xpEarned}
           onReplay={handleReplay}
           onChangeBlock={handleChangeBlock}
+          showLoginBanner={!user}
+          onLogin={openAuthModal}
         />
       </div>
     )
