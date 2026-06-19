@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
-const X1_TIMER_SPIRAL = [45, 40, 35, 30, 25, 20, 15, 12, 8, 5]
+const X1_TIMER_SPIRAL = [50, 45, 40, 35, 30, 25, 20, 15, 10, 5]
 
 export function getTimeForQuestion(questionIndex, challengeType) {
   if (challengeType === 'x1') {
