@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useAuth } from '../context/AuthContext'
-import { useGameContext } from '../context/GameContext'
-import { HIZB_BLOCKS } from '../data/hizbBlocks'
 import { supabase } from '../services/supabase'
 
-const RANK_COLORS = {
-  1: '#F0C94A',
-  2: '#C0C0C0',
-  3: '#CD7F32',
+const RANK_DISPLAY = {
+  1: { icon: '👑', color: '#F0C94A' },
+  2: { icon: '🥈', color: '#C0C0C0' },
+  3: { icon: '🥉', color: '#CD7F32' },
 }
 
 const AVATAR_COLORS = [
@@ -23,29 +21,6 @@ const AVATAR_COLORS = [
 function getAvatarColor(name) {
   const code = (name || 'J').charCodeAt(0)
   return AVATAR_COLORS[code % AVATAR_COLORS.length]
-}
-
-function groupLeaderboard(rows) {
-  const map = new Map()
-
-  for (const row of rows) {
-    const existing = map.get(row.user_id)
-    const username = row.profiles?.username || row.profiles?.full_name || 'Joueur'
-    if (existing) {
-      existing.totalXp += row.xp_earned || 0
-    } else {
-      map.set(row.user_id, {
-        userId: row.user_id,
-        username,
-        avatarUrl: row.profiles?.avatar_url,
-        totalXp: row.xp_earned || 0,
-      })
-    }
-  }
-
-  return Array.from(map.values())
-    .sort((a, b) => b.totalXp - a.totalXp)
-    .slice(0, 20)
 }
 
 function PlayerAvatar({ name, size = 'md' }) {
@@ -64,7 +39,7 @@ function PlayerAvatar({ name, size = 'md' }) {
 }
 
 function LeaderboardRow({ player, rank, isCurrentUser, isPodium }) {
-  const rankColor = RANK_COLORS[rank]
+  const rankInfo = RANK_DISPLAY[rank]
 
   return (
     <motion.div
@@ -74,16 +49,18 @@ function LeaderboardRow({ player, rank, isCurrentUser, isPodium }) {
       className={`flex items-center gap-3 rounded-button px-4 py-3 min-h-[44px] ${
         isCurrentUser
           ? 'bg-[#FEF9E7] border-2 border-[#F0C94A]'
-          : isPodium
-            ? 'bg-white border border-[#E8F5EE] shadow-card'
-            : 'bg-white border border-[#E8F5EE]'
+          : rank === 1
+            ? 'bg-[#FEF9E7] border border-[#F0C94A] shadow-card'
+            : isPodium
+              ? 'bg-white border border-[#E8F5EE] shadow-card'
+              : 'bg-white border border-[#E8F5EE]'
       } ${isPodium ? 'py-4' : ''}`}
     >
       <span
         className={`font-bold shrink-0 w-8 text-center ${isPodium ? 'text-lg' : 'text-sm'}`}
-        style={{ color: rankColor || '#6B7280' }}
+        style={{ color: rankInfo?.color || '#6B7280' }}
       >
-        {rank <= 3 ? (rank === 1 ? '👑' : rank) : rank}
+        {rankInfo ? rankInfo.icon : rank}
       </span>
       <PlayerAvatar name={player.username} size={isPodium ? 'lg' : 'md'} />
       <div className="flex-1 min-w-0">
@@ -101,8 +78,6 @@ function LeaderboardRow({ player, rank, isCurrentUser, isPodium }) {
 
 export default function ClassementPage() {
   const { user } = useAuth()
-  const { selectedHizbBlock, setSelectedHizbBlock } = useGameContext()
-  const [dropdownOpen, setDropdownOpen] = useState(false)
   const [leaderboard, setLeaderboard] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -112,76 +87,38 @@ export default function ClassementPage() {
     async function fetchLeaderboard() {
       setLoading(true)
       const { data } = await supabase
-        .from('game_sessions')
-        .select('user_id, xp_earned, profiles(username, full_name, avatar_url)')
-        .eq('hizb_block', selectedHizbBlock.label)
-        .order('xp_earned', { ascending: false })
+        .from('profiles')
+        .select('id, username, avatar_url, total_xp')
+        .order('total_xp', { ascending: false })
+        .limit(20)
 
       if (!cancelled) {
-        setLeaderboard(groupLeaderboard(data || []))
+        setLeaderboard(
+          (data || []).map((row) => ({
+            userId: row.id,
+            username: row.username || 'Joueur',
+            avatarUrl: row.avatar_url,
+            totalXp: row.total_xp || 0,
+          }))
+        )
         setLoading(false)
       }
     }
 
     fetchLeaderboard()
     return () => { cancelled = true }
-  }, [selectedHizbBlock.label])
+  }, [])
 
   const top3 = leaderboard.slice(0, 3)
   const rest = leaderboard.slice(3)
 
   return (
     <div className="px-4 py-4 pb-6">
-      <div className="flex items-center gap-2 mb-5">
-        <span className="text-2xl" aria-hidden="true">👑</span>
-        <h1 className="text-xl font-bold text-[#064E3B]">Classement</h1>
-      </div>
-
-      <div
-        className="mb-5 rounded-button p-3"
-        style={{ background: 'rgba(16, 185, 129, 0.04)' }}
-      >
-        <label className="block text-sm font-medium text-text-primary mb-2 pl-2 border-l-[3px] border-[#F0C94A]">
-          Bloc Hizb
-        </label>
-        <div className="relative">
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="w-full bg-surface border border-border rounded-button px-4 py-3 min-h-[44px] text-left text-sm flex items-center justify-between focus:outline-none focus:border-primary-green focus:ring-1 focus:ring-primary-green transition-colors"
-          >
-            <span className="truncate pr-2">{selectedHizbBlock.label}</span>
-            <svg
-              className={`w-5 h-5 text-primary-green shrink-0 transition-transform ${
-                dropdownOpen ? 'rotate-180' : ''
-              }`}
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
-          {dropdownOpen && (
-            <div className="absolute z-20 top-full left-0 right-0 mt-1 bg-surface border border-border rounded-button shadow-card max-h-60 overflow-y-auto">
-              {HIZB_BLOCKS.map((block) => (
-                <button
-                  key={block.label}
-                  onClick={() => {
-                    setSelectedHizbBlock(block)
-                    setDropdownOpen(false)
-                  }}
-                  className={`w-full text-left px-4 py-2.5 min-h-[44px] text-sm hover:bg-[#F0FDF9] transition-colors ${
-                    selectedHizbBlock.label === block.label
-                      ? 'text-primary-green font-medium bg-[#F0FDF9]'
-                      : 'text-text-primary'
-                  }`}
-                >
-                  {block.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+      <div className="mb-5">
+        <h1 className="text-xl font-bold text-[#064E3B]">🏆 Classement Global</h1>
+        <p className="text-sm text-text-secondary mt-1">
+          Classement basé sur le total XP gagné
+        </p>
       </div>
 
       {loading ? (
@@ -192,7 +129,7 @@ export default function ClassementPage() {
       ) : leaderboard.length === 0 ? (
         <div className="card-base p-8 text-center">
           <p className="text-text-secondary text-sm">
-            Aucun joueur sur ce bloc encore. Sois le premier !
+            Aucun joueur encore. Sois le premier !
           </p>
         </div>
       ) : (
