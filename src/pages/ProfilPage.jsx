@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { supabase } from '../services/supabase'
+import DeleteAccountModal from '../components/DeleteAccountModal'
 
 const CHALLENGE_LABELS = {
   x1: 'Le X-1',
@@ -51,11 +53,31 @@ function BadgeCard({ badge }) {
 }
 
 export default function ProfilPage() {
-  const { user, profile, loading, openAuthModal, signOut } = useAuth()
+  const navigate = useNavigate()
+  const { user, profile, loading, openAuthModal, signOut, deleteAccount } = useAuth()
   const [sessions, setSessions] = useState([])
   const [allSessions, setAllSessions] = useState([])
   const [stats, setStats] = useState({ sessionCount: 0, successRate: 0 })
   const [sessionsLoading, setSessionsLoading] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true)
+    setDeleteError('')
+
+    const { error } = await deleteAccount()
+
+    if (error) {
+      setDeleteError(error.message || 'Impossible de supprimer le compte. Réessaie.')
+      setDeleteLoading(false)
+      return
+    }
+
+    setDeleteModalOpen(false)
+    navigate('/')
+  }
 
   useEffect(() => {
     if (!user) return
@@ -198,6 +220,26 @@ export default function ProfilPage() {
       >
         Se déconnecter
       </button>
+
+      <button
+        onClick={() => {
+          setDeleteError('')
+          setDeleteModalOpen(true)
+        }}
+        className="btn-outline-red w-full min-h-[44px] mt-3"
+      >
+        Supprimer mon compte
+      </button>
+
+      <DeleteAccountModal
+        open={deleteModalOpen}
+        onClose={() => {
+          if (!deleteLoading) setDeleteModalOpen(false)
+        }}
+        onConfirm={handleDeleteAccount}
+        loading={deleteLoading}
+        error={deleteError}
+      />
     </div>
   )
 }

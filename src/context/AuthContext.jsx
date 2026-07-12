@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../services/supabase'
+import { deleteAccount as deleteAccountService } from '../services/deleteAccount'
 
 const AuthContext = createContext({})
 
@@ -57,6 +58,19 @@ export function AuthProvider({ children }) {
     setProfile(null)
   }
 
+  async function deleteAccount() {
+    if (!user) return { error: new Error('Non connecté') }
+
+    try {
+      await deleteAccountService(user.id)
+      setUser(null)
+      setProfile(null)
+      return { error: null }
+    } catch (err) {
+      return { error: err }
+    }
+  }
+
   async function updateXP(xpEarned, sessionData) {
     if (!user) return
 
@@ -110,6 +124,7 @@ export function AuthProvider({ children }) {
         signInWithEmail,
         signUpWithEmail,
         signOut,
+        deleteAccount,
         updateXP,
         fetchProfile,
       }}
