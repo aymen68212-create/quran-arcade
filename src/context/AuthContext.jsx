@@ -62,7 +62,7 @@ export function AuthProvider({ children }) {
     if (!user) return { error: new Error('Non connecté') }
 
     try {
-      await deleteAccountService(user.id)
+      await deleteAccountService()
       setUser(null)
       setProfile(null)
       return { error: null }
